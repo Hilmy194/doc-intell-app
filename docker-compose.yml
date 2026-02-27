@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  api:
+    build: ./apps/api
+    ports:
+      - "4000:3000"
+    env_file:
+      - ./apps/api/.env
+    environment:
+      - PORT=3000
+      - PYTHON_PATH=python3
+    restart: unless-stopped
+
+  web:
+    build: ./apps/web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped

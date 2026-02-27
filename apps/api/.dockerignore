@@ -1,0 +1,8 @@
+node_modules
+.kreuzberg
+uploads
+.env
+.env.local
+*.md
+.git
+.gitignore
