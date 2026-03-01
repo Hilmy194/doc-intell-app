@@ -34,15 +34,20 @@ export function uploadFiles(files, onProgress) {
           }
           resolve(response);
         } else {
-          reject(new Error(response.error || 'Upload failed'));
+          reject(new Error(response.error || `Upload failed (HTTP ${xhr.status})`));
         }
       } catch {
-        reject(new Error('Failed to parse server response'));
+        // API returned non-JSON (e.g. Render cold-start 502, CORS block, or server crash)
+        const preview = xhr.responseText ? xhr.responseText.slice(0, 120) : '(empty)';
+        reject(new Error(
+          `Server returned HTTP ${xhr.status} — API mungkin sedang cold-start atau crash.\n` +
+          `Cek: ${BASE_URL}/api/health\nResponse: ${preview}`
+        ));
       }
     });
 
     xhr.addEventListener('error', () => {
-      reject(new Error('Network error during upload'));
+      reject(new Error(`Network error — tidak bisa menghubungi API di ${BASE_URL}. Cek VITE_API_URL di Vercel env vars.`));
     });
 
     xhr.addEventListener('abort', () => {
