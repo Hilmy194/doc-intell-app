@@ -1,10 +1,11 @@
 const express = require('express');
 const upload = require('../middlewares/multer');
 const { handleUpload } = require('../controllers/upload.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-router.post('/', upload.array('files', 20), handleUpload);
+router.post('/', authMiddleware, upload.array('files', 20), handleUpload);
 
 // Multer error handler
 router.use((err, _req, res, _next) => {

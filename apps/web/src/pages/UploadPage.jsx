@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Dropzone from "../components/upload/Dropzone";
 import ExtractionViewer from "../components/upload/ExtractionViewer";
 import { uploadFiles, deleteFile, listFiles } from "../lib/apiClient";
@@ -54,6 +56,13 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState(null);
   const [extractTarget, setExtractTarget] = useState(null);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   // Load persisted files from server on mount
   useEffect(() => {
@@ -113,9 +122,25 @@ export default function UploadPage() {
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Header */}
-        <div>
-          <h1 className="text-xl font-bold text-white">Document Intelligence</h1>
-          <p className="text-sm text-[#8b9cc8] mt-1">Upload, parse, and extract structured data from your documents</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-white">Document Intelligence</h1>
+            <p className="text-sm text-[#8b9cc8] mt-1">Upload, parse, and extract structured data from your documents</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {user && (
+              <span className="text-xs text-[#8b9cc8]">{user.email}</span>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e2340] border border-[#2a3060] hover:border-red-500/50 rounded-lg text-xs text-[#8b9cc8] hover:text-red-400 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Error banner */}

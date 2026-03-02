@@ -1,13 +1,10 @@
 import { useState, useCallback } from 'react';
 import { extractFile } from '../../lib/apiClient';
 
-const TABS = ['Parse', 'Split', 'Extract'];
+const TABS = ['Extract', 'Parse', 'Split'];
 const TOOLS = [
   { value: 'kreuzberg', label: 'Kreuzberg', desc: 'Python-based extraction supporting PDF, DOCX, PPTX, XLSX, images (OCR), TXT, CSV, and more. No external API needed.' },
-  { value: 'local', label: 'Local (built-in)', desc: 'Simple built-in parsers: pdf-parse for PDFs, plain text for TXT/CSV/JSON. Lightweight fallback.' },
-  { value: 'landing-ai', label: 'Landing AI (coming soon)', disabled: true, desc: 'Agentic document extraction via Landing AI API.' },
-  { value: 'unstructured', label: 'Unstructured (coming soon)', disabled: true, desc: 'Open-source ETL pipeline for documents.' },
-  { value: 'azure-di', label: 'Azure Document Intelligence (coming soon)', disabled: true, desc: 'Microsoft Azure cloud-based document analysis.' },
+  { value: 'docling', label: 'Docling', desc: 'Python-based document parsing using Docling library. Supports PDF, DOCX, PPTX, XLSX, images, and more.' },
 ];
 
 function getFileType(mime = '') {
@@ -261,6 +258,28 @@ export default function ExtractionViewer({ file, onClose }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
             </a>
+            {/* Download Markdown */}
+            {result && result.markdown && (
+              <button
+                onClick={() => {
+                  const blob = new Blob([result.markdown], { type: 'text/markdown;charset=utf-8' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  const baseName = file.name.replace(/\.[^/.]+$/, '');
+                  a.href = url;
+                  a.download = `${baseName}-extracted.md`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex items-center gap-1 px-2 py-1 text-xs text-[#4f7cff] hover:text-white border border-[#2a3060] hover:border-[#4f7cff] rounded transition-colors"
+                title="Download Markdown"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                .md
+              </button>
+            )}
             {/* Close */}
             <button
               onClick={onClose}

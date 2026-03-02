@@ -1,11 +1,12 @@
 // Extraction controller — downloads file from Supabase, runs extractor, cleans up
+const { v4: uuidv4 } = require('uuid');
 const { getExtractor, listTools } = require('../services/extractors');
 const { getFileRecord, updateFileRecord } = require('../services/db.service');
 const { downloadToTemp, cleanupTemp } = require('../services/storage.service');
 
 // POST /api/extract — extract content from an uploaded file
 const handleExtract = async (req, res) => {
-  const { storedName, mime, tool = 'local', options = {} } = req.body;
+  const { storedName, mime, tool = 'kreuzberg', options = {} } = req.body;
 
   if (!storedName) {
     return res.status(400).json({ error: 'storedName is required' });
@@ -29,7 +30,16 @@ const handleExtract = async (req, res) => {
     // Mark extraction as done
     await updateFileRecord(storedName, { extractStatus: 'done' }).catch(() => {});
 
-    return res.json({ success: true, tool, ...result });
+    // Append RAG-ready metadata
+    const metadata = {
+      documentId: record.id || `doc_${uuidv4().replace(/-/g, '').slice(0, 12)}`,
+      extractor: tool,
+      extractedAt: new Date().toISOString(),
+      chunkCount: result.chunks ? result.chunks.length : 0,
+      wordCount: result.wordCount || 0,
+    };
+
+    return res.json({ success: true, tool, ...result, ...metadata });
   } catch (err) {
     console.error('Extract error:', err.message);
     return res.status(500).json({ error: err.message });
