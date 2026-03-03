@@ -18,6 +18,7 @@ async function saveFileRecord(record) {
       url: record.url,
       status: record.status || 'uploaded',
       extract_status: record.extractStatus || 'pending',
+      case_id: record.caseId || null,
     })
     .select()
     .single();
@@ -36,6 +37,20 @@ async function listFileRecords() {
     .order('uploaded_at', { ascending: false });
 
   if (error) throw new Error(`DB list failed: ${error.message}`);
+  return (data || []).map(toClientFormat);
+}
+
+/**
+ * Fetch file records belonging to a specific case.
+ */
+async function listFileRecordsByCase(caseId) {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('*')
+    .eq('case_id', caseId)
+    .order('uploaded_at', { ascending: false });
+
+  if (error) throw new Error(`DB list by case failed: ${error.message}`);
   return (data || []).map(toClientFormat);
 }
 
@@ -93,12 +108,14 @@ function toClientFormat(row) {
     uploadedAt: row.uploaded_at,
     status: row.status,
     extractStatus: row.extract_status,
+    caseId: row.case_id || null,
   };
 }
 
 module.exports = {
   saveFileRecord,
   listFileRecords,
+  listFileRecordsByCase,
   getFileRecord,
   updateFileRecord,
   deleteFileRecord,

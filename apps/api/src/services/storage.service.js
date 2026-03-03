@@ -7,11 +7,14 @@ const supabase = require('./supabase');
 const BUCKET = process.env.SUPABASE_BUCKET || 'documents';
 
 /**
- * Upload a file buffer to Supabase Storage.
- * Returns the storage path used as the key.
+ * Upload a file buffer to Supabase Storage under cases/<caseId>/<storedName>.
+ * @param {Buffer} buffer
+ * @param {string} storedName  - unique file name (used as temp/extract key)
+ * @param {string} mimeType
+ * @param {string} storagePath - full storage path (e.g. cases/<caseId>/<storedName>)
  */
-async function uploadFile(buffer, storedName, mimeType) {
-  const storagePath = `uploads/${storedName}`;
+async function uploadFile(buffer, storedName, mimeType, storagePath) {
+  if (!storagePath) throw new Error('uploadFile: storagePath is required');
 
   const { error } = await supabase.storage
     .from(BUCKET)
@@ -26,19 +29,32 @@ async function uploadFile(buffer, storedName, mimeType) {
 
 /**
  * Get the public URL for a file in storage.
+ * @param {string} storedName  - not used directly; kept for signature compat
+ * @param {string} storagePath - full storage path
  */
-function getPublicUrl(storedName) {
-  const storagePath = `uploads/${storedName}`;
+function getPublicUrl(storedName, storagePath) {
+  if (!storagePath) throw new Error('getPublicUrl: storagePath is required');
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
   return data.publicUrl;
 }
 
 /**
+ * Resolve the full storage path for a file inside its case folder.
+ * All files are stored under cases/<caseId>/<storedName>.
+ */
+function resolvePath(storedName, caseId) {
+  if (!caseId) throw new Error(`resolvePath: caseId is required for storedName "${storedName}"`);
+  return `cases/${caseId}/${storedName}`;
+}
+
+/**
  * Download a file from Supabase to the OS temp directory.
  * Returns the local temp file path for processing.
+ * @param {string} storedName
+ * @param {string|null} [caseId] - pass caseId so the correct path is resolved
  */
-async function downloadToTemp(storedName) {
-  const storagePath = `uploads/${storedName}`;
+async function downloadToTemp(storedName, caseId) {
+  const storagePath = resolvePath(storedName, caseId);
 
   const { data, error } = await supabase.storage
     .from(BUCKET)
@@ -58,9 +74,11 @@ async function downloadToTemp(storedName) {
 
 /**
  * Delete a file from Supabase Storage.
+ * @param {string} storedName
+ * @param {string|null} [caseId] - pass caseId so the correct path is resolved
  */
-async function deleteFile(storedName) {
-  const storagePath = `uploads/${storedName}`;
+async function deleteFile(storedName, caseId) {
+  const storagePath = resolvePath(storedName, caseId);
 
   const { error } = await supabase.storage
     .from(BUCKET)

@@ -22,7 +22,8 @@ const handleExtract = async (req, res) => {
 
   try {
     // Download from Supabase to a temp file for processing
-    tempPath = await downloadToTemp(storedName);
+    // Pass caseId so the correct storage path is resolved
+    tempPath = await downloadToTemp(storedName, record.caseId || null);
 
     const extractor = getExtractor(tool);
     const result = await extractor.extract(tempPath, mime || record.mime, options);

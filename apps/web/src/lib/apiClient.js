@@ -1,6 +1,7 @@
 // API client — all server communication goes through here
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 const UPLOAD_URL = `${BASE_URL}/api/upload`;
+const CASES_URL = `${BASE_URL}/api/cases`;
 
 function getAuthToken() {
   return localStorage.getItem('docintel_token');
@@ -36,8 +37,11 @@ export async function registerUser(email, password, name) {
 
 /**
  * Upload files with progress tracking via XMLHttpRequest.
+ * @param {File[]} files
+ * @param {function} onProgress
+ * @param {string|null} caseId  - optional case to scope the upload
  */
-export function uploadFiles(files, onProgress) {
+export function uploadFiles(files, onProgress, caseId = null) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
@@ -45,6 +49,8 @@ export function uploadFiles(files, onProgress) {
     files.forEach((file) => {
       formData.append('files', file);
     });
+
+    if (caseId) formData.append('caseId', caseId);
 
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable && onProgress) {
@@ -137,5 +143,68 @@ export async function listFiles() {
   const res = await fetch(`${BASE_URL}/api/files`);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to list files');
+  return data.files || [];
+}
+
+// ── Cases API ────────────────────────────────────────────────────────────────
+
+// Fetch all cases
+export async function listCases() {
+  const res = await fetch(CASES_URL);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to list cases');
+  return data.cases || [];
+}
+
+// Create a new case
+export async function createCase({ name, description }) {
+  const token = getAuthToken();
+  const res = await fetch(CASES_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ name, description }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to create case');
+  return data.case;
+}
+
+// Delete a case (and all its files)
+export async function deleteCase(caseId) {
+  const token = getAuthToken();
+  const res = await fetch(`${CASES_URL}/${encodeURIComponent(caseId)}`, {
+    method: 'DELETE',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete case');
+  }
+}
+
+// Update a case name / description
+export async function updateCase(caseId, { name, description }) {
+  const token = getAuthToken();
+  const res = await fetch(`${CASES_URL}/${encodeURIComponent(caseId)}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ name, description }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to update case');
+  return data.case;
+}
+
+// Fetch files scoped to a specific case
+export async function listCaseFiles(caseId) {
+  const res = await fetch(`${CASES_URL}/${encodeURIComponent(caseId)}/files`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to list case files');
   return data.files || [];
 }

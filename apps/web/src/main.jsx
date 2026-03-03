@@ -5,7 +5,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import UploadPage from './pages/UploadPage';
+import CasesPage from './pages/CasesPage';
+import CaseDetailPage from './pages/CaseDetailPage';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -19,7 +20,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             path="/"
             element={
               <ProtectedRoute>
-                <UploadPage />
+                <CasesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cases/:caseId"
+            element={
+              <ProtectedRoute>
+                <CaseDetailPage />
               </ProtectedRoute>
             }
           />
@@ -29,3 +38,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+

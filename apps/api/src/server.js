@@ -6,6 +6,7 @@ const uploadRoutes = require('./routes/upload.routes');
 const extractRoutes = require('./routes/extract.routes');
 const filesRoutes = require('./routes/files.routes');
 const authRoutes = require('./routes/auth.routes');
+const casesRoutes = require('./routes/cases.routes');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -27,6 +28,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/cases', casesRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/extract', extractRoutes);
 app.use('/api/files', filesRoutes);
