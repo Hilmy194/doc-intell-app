@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { loginUser } from '../lib/apiClient';
+import { registerUser } from '../lib/apiClient';
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -14,9 +16,20 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     setLoading(true);
     try {
-      const data = await loginUser(email, password);
+      const data = await registerUser(email, password, name);
       login(data.token, data.user);
       navigate('/', { replace: true });
     } catch (err) {
@@ -38,10 +51,10 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-white">Document Intelligence</h1>
-          <p className="text-sm text-[#8b9cc8] mt-1">Sign in to access your workspace</p>
+          <p className="text-sm text-[#8b9cc8] mt-1">Create your account</p>
         </div>
 
-        {/* Login Card */}
+        {/* Register Card */}
         <div className="bg-[#1e2340] border border-[#2a3060] rounded-xl p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
@@ -49,6 +62,19 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+
+            <div>
+              <label className="block text-xs font-semibold text-[#8b9cc8] uppercase tracking-wider mb-1.5">
+                Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-[#0d0f1e] border border-[#2a3060] rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#4f7cff] placeholder:text-[#5c6290] transition-colors"
+                placeholder="Your name"
+              />
+            </div>
 
             <div>
               <label className="block text-xs font-semibold text-[#8b9cc8] uppercase tracking-wider mb-1.5">
@@ -75,6 +101,20 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full bg-[#0d0f1e] border border-[#2a3060] rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#4f7cff] placeholder:text-[#5c6290] transition-colors"
+                placeholder="Min. 6 characters"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#8b9cc8] uppercase tracking-wider mb-1.5">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full bg-[#0d0f1e] border border-[#2a3060] rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#4f7cff] placeholder:text-[#5c6290] transition-colors"
                 placeholder="••••••••"
               />
             </div>
@@ -90,16 +130,16 @@ export default function LoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  Signing in…
+                  Creating account…
                 </>
-              ) : 'Sign In'}
+              ) : 'Create Account'}
             </button>
           </form>
 
           <p className="text-center text-sm text-[#8b9cc8] mt-4">
-            Don&apos;t have an account?{' '}
-            <Link to="/register" className="text-[#4f7cff] hover:underline font-medium">
-              Create one
+            Already have an account?{' '}
+            <Link to="/login" className="text-[#4f7cff] hover:underline font-medium">
+              Sign in
             </Link>
           </p>
         </div>

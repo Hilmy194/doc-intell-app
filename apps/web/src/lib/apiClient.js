@@ -21,6 +21,20 @@ export async function loginUser(email, password) {
 }
 
 /**
+ * Register a new user and return { token, user, message }
+ */
+export async function registerUser(email, password, name) {
+  const res = await fetch(`${BASE_URL}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, name }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Registration failed');
+  return data;
+}
+
+/**
  * Upload files with progress tracking via XMLHttpRequest.
  */
 export function uploadFiles(files, onProgress) {

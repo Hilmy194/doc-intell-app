@@ -5,15 +5,28 @@ services:
     build: ./apps/api
     ports:
       - "4000:3000"
+    # .env file digunakan di local dev saja (tidak di-push ke GitHub).
+    # Di production server, set environment variables langsung di sistem
+    # atau via platform (Render, Railway, dll).
     env_file:
       - ./apps/api/.env
     environment:
-      - PORT=3000
-      - PYTHON_PATH=python3
+      PORT: "3000"
+      PYTHON_PATH: python3
+      # Semua var di bawah bisa di-override dari sistem / platform:
+      # SUPABASE_URL: ${SUPABASE_URL}
+      # SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      # SUPABASE_BUCKET: ${SUPABASE_BUCKET}
+      # JWT_SECRET: ${JWT_SECRET}
+      # WEB_URL: ${WEB_URL}
     restart: unless-stopped
 
   web:
-    build: ./apps/web
+    build:
+      context: ./apps/web
+      args:
+        # VITE_API_URL di-bake saat build — set dari env sistem atau override di sini
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
     ports:
       - "8080:80"
     depends_on:

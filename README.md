@@ -1,125 +1,130 @@
-# Document Intelligence App — Phase 1
+# Document Intelligence App
 
-Upload system foundation for the Document Intelligence pipeline.
+Upload, parse, and extract structured data from documents using OCR and AI-powered extractors.
 
 ## Tech Stack
 
-- **Frontend:** React + Vite + TailwindCSS
-- **Backend:** Node.js + Express + Multer
+- **Frontend:** React + Vite + TailwindCSS (deployed on **Vercel**)
+- **Backend:** Node.js + Express (deployed on **Render**)
+- **Database & Storage:** Supabase (PostgreSQL + Storage)
+- **Auth:** Supabase Auth (email/password registration & login)
+- **Extractors:** Kreuzberg (OCR), Docling (document parsing)
 - **Architecture:** Monorepo (npm workspaces)
 
 ## Prerequisites
 
 - Node.js >= 18
-- npm >= 9
+- Python >= 3.9 (for extractors)
 
-## Setup
+## Local Development
 
 ```bash
-# 1. Clone the repo & enter the project
-cd doc-intel-app
-
-# 2. Install all dependencies (root + workspaces)
+# 1. Install all dependencies
 npm install
 
-# 3. Copy env example (optional)
-cp .env.example .env
-```
+# 2. Copy env files
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
 
-## Running the App
+# 3. Fill in your Supabase credentials in apps/api/.env
 
-### Start both frontend & backend concurrently
-
-```bash
+# 4. Start both frontend & backend
 npm run dev
 ```
 
 ### Start individually
 
 ```bash
-# Backend (port 4000)
-npm run dev:api
-
-# Frontend (port 5173)
-npm run dev:web
+npm run dev:api   # Backend on port 4000
+npm run dev:web   # Frontend on port 5173
 ```
 
-## API
+## Deployment
 
-### POST `/api/upload`
+### Frontend → Vercel
 
-- **Content-Type:** `multipart/form-data`
-- **Field name:** `files`
-- **Max file size:** 25 MB
-- **Allowed types:** pdf, png, jpg, jpeg, docx, xlsx, pptx, txt, csv
+1. Import repo on Vercel, set **Root Directory** to `apps/web`
+2. Set environment variable: `VITE_API_URL` = your Render API URL
+3. Deploy
 
-#### Success Response (200)
+### Backend → Render
 
-```json
-{
-  "files": [
-    {
-      "id": "f_abc123def456",
-      "name": "document.pdf",
-      "mime": "application/pdf",
-      "size": 2039201,
-      "status": "uploaded"
-    }
-  ]
-}
-```
+1. Create a **Web Service** on Render, set **Root Directory** to `apps/api`
+2. Set **Build Command**: `npm install`
+3. Set **Start Command**: `node src/server.js`
+4. Or use **Docker** (Dockerfile included in apps/api)
+5. Set environment variables:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_BUCKET` = documents
+   - `JWT_SECRET` = (random secret)
+   - `WEB_URL` = your Vercel frontend URL
+   - `PORT` = 3000
+   - `PYTHON_PATH` = python3
 
-#### Error Response (400 / 413)
+### Supabase Setup
 
-```json
-{
-  "error": "Extension .exe is not allowed"
-}
-```
+1. Create a Supabase project
+2. Go to **Authentication** → **Sign In / Providers** → **Email** → disable **Confirm email**
+3. Create a `files` table with columns: `id`, `name`, `stored_name`, `mime`, `size`, `url`, `status`, `extract_status`, `uploaded_at`
+4. Create a Storage bucket named `documents`
 
-### GET `/api/health`
+## API Endpoints
 
-Health check endpoint.
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/login` | No | Login |
+| POST | `/api/auth/register` | No | Register |
+| POST | `/api/upload` | Yes | Upload files |
+| GET | `/api/files` | No | List files |
+| DELETE | `/api/files/:storedName` | Yes | Delete file |
+| POST | `/api/extract` | Yes | Extract content |
+| GET | `/api/extract/tools` | No | List extractors |
+| GET | `/api/health` | No | Health check |
 
-## Folder Structure
+## Project Structure
 
 ```
 doc-intel-app/
 ├── package.json
-├── .env.example
-├── README.md
+├── docker-compose.yml
 ├── apps/
-│   ├── web/                  # Frontend (Vite + React + Tailwind)
-│   │   ├── package.json
-│   │   ├── vite.config.js
-│   │   ├── tailwind.config.js
-│   │   ├── postcss.config.js
-│   │   ├── index.html
-│   │   └── src/
-│   │       ├── main.jsx
-│   │       ├── index.css
-│   │       ├── pages/
-│   │       │   └── UploadPage.jsx
-│   │       ├── components/
-│   │       │   └── upload/
-│   │       │       ├── Dropzone.jsx
-│   │       │       ├── FileItem.jsx
-│   │       │       └── validators.js
-│   │       └── lib/
-│   │           └── apiClient.js
-│   └── api/                  # Backend (Express + Multer)
-│       ├── package.json
-│       ├── uploads/
-│       └── src/
-│           ├── server.js
-│           ├── routes/
-│           │   └── upload.routes.js
-│           ├── controllers/
-│           │   └── upload.controller.js
-│           ├── middlewares/
-│           │   └── multer.js
-│           └── config/
-│               └── allowedFiles.js
+│   ├── web/                    # Frontend (Vercel)
+│   │   ├── vercel.json
+│   │   ├── src/
+│   │   │   ├── main.jsx
+│   │   │   ├── pages/
+│   │   │   │   ├── LoginPage.jsx
+│   │   │   │   ├── RegisterPage.jsx
+│   │   │   │   └── UploadPage.jsx
+│   │   │   ├── components/
+│   │   │   │   ├── auth/ProtectedRoute.jsx
+│   │   │   │   └── upload/
+│   │   │   │       ├── Dropzone.jsx
+│   │   │   │       ├── ExtractionViewer.jsx
+│   │   │   │       └── validators.js
+│   │   │   ├── context/AuthContext.jsx
+│   │   │   └── lib/apiClient.js
+│   │   └── ...
+│   └── api/                    # Backend (Render)
+│       ├── Dockerfile
+│       ├── src/
+│       │   ├── server.js
+│       │   ├── routes/
+│       │   ├── controllers/
+│       │   ├── middlewares/
+│       │   ├── services/
+│       │   │   ├── supabase.js
+│       │   │   ├── db.service.js
+│       │   │   ├── storage.service.js
+│       │   │   └── extractors/
+│       │   │       ├── index.js
+│       │   │       ├── kreuzberg.extractor.js
+│       │   │       └── docling.extractor.js
+│       │   └── config/allowedFiles.js
+│       └── scripts/
+│           ├── kreuzberg_extract.py
+│           └── docling_extract.py
 ```
 
 ## License
