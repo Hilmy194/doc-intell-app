@@ -1,8 +1,6 @@
-// Files controller — list and delete files via Supabase
 const { listFileRecords, getFileRecord, deleteFileRecord } = require('../services/db.service');
 const { deleteFile: deleteFromStorage } = require('../services/storage.service');
 
-// GET /api/files — return all uploaded file records
 const listFiles = async (_req, res) => {
   try {
     const files = await listFileRecords();
@@ -13,7 +11,6 @@ const listFiles = async (_req, res) => {
   }
 };
 
-// DELETE /api/files/:storedName — remove file from storage and database
 const deleteFile = async (req, res) => {
   const { storedName } = req.params;
 

@@ -7,6 +7,8 @@ const {
   updateCase,
   deleteCase,
   listCaseFiles,
+  getOntology,
+  updateOntology,
 } = require('../controllers/cases.controller');
 
 const router = express.Router();
@@ -17,5 +19,7 @@ router.get('/:caseId', getCase);
 router.patch('/:caseId', authMiddleware, updateCase);
 router.delete('/:caseId', authMiddleware, deleteCase);
 router.get('/:caseId/files', listCaseFiles);
+router.get('/:caseId/ontology', getOntology);
+router.put('/:caseId/ontology', authMiddleware, updateOntology);
 
 module.exports = router;

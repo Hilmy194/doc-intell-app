@@ -1,5 +1,3 @@
-// Extractor registry — add new tools here without changing the controller
-// Each extractor exports: extract(filePath, mime, options) → Promise<{ markdown, json, chunks }>
 const kreuzbergExtractor = require('./kreuzberg.extractor');
 const doclingExtractor = require('./docling.extractor');
 

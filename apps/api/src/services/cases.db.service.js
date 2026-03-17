@@ -1,11 +1,7 @@
-// Cases CRUD via Supabase PostgreSQL
 const supabase = require('./supabase');
 
 const TABLE = 'cases';
 
-/**
- * Insert a new case record.
- */
 async function saveCaseRecord(record) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -22,9 +18,6 @@ async function saveCaseRecord(record) {
   return toClientFormat(data);
 }
 
-/**
- * Fetch all cases, ordered by newest first.
- */
 async function listCaseRecords() {
   const { data, error } = await supabase
     .from(TABLE)
@@ -35,9 +28,6 @@ async function listCaseRecords() {
   return (data || []).map(toClientFormat);
 }
 
-/**
- * Get a single case by its id.
- */
 async function getCaseRecord(caseId) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -49,9 +39,6 @@ async function getCaseRecord(caseId) {
   return toClientFormat(data);
 }
 
-/**
- * Update case fields (name, description).
- */
 async function updateCaseRecord(caseId, updates) {
   const dbUpdates = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name;
@@ -65,9 +52,15 @@ async function updateCaseRecord(caseId, updates) {
   if (error) throw new Error(`DB update case failed: ${error.message}`);
 }
 
-/**
- * Delete a case record by id.
- */
+async function updateOntologyRules(caseId, rules) {
+  const { error } = await supabase
+    .from(TABLE)
+    .update({ ontology_rules: rules })
+    .eq('id', caseId);
+
+  if (error) throw new Error(`DB update ontology failed: ${error.message}`);
+}
+
 async function deleteCaseRecord(caseId) {
   const { error } = await supabase
     .from(TABLE)
@@ -83,6 +76,7 @@ function toClientFormat(row) {
     name: row.name,
     description: row.description,
     userId: row.user_id,
+    ontologyRules: row.ontology_rules || [],
     createdAt: row.created_at,
   };
 }
@@ -92,5 +86,6 @@ module.exports = {
   listCaseRecords,
   getCaseRecord,
   updateCaseRecord,
+  updateOntologyRules,
   deleteCaseRecord,
 };

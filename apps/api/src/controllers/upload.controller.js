@@ -1,4 +1,3 @@
-// Upload controller — receives files from multer (memory), stores in Supabase
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { uploadFile, getPublicUrl } = require('../services/storage.service');

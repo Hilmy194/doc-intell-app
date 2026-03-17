@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CasesPage from './pages/CasesPage';
 import CaseDetailPage from './pages/CaseDetailPage';
+import KnowledgeGraphPage from './pages/KnowledgeGraphPage';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -29,6 +30,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             element={
               <ProtectedRoute>
                 <CaseDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cases/:caseId/knowledge-graph"
+            element={
+              <ProtectedRoute>
+                <KnowledgeGraphPage />
               </ProtectedRoute>
             }
           />

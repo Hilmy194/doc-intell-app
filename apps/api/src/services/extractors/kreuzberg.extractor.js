@@ -1,12 +1,8 @@
-// Kreuzberg extractor — Python-based OCR/document parsing via subprocess
-// Supports: PDF, DOCX, PPTX, XLSX, images (Tesseract OCR), TXT, CSV, HTML
 const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
 const SCRIPT_PATH = path.join(__dirname, '..', '..', '..', 'scripts', 'kreuzberg_extract.py');
-
-// Python executable — set PYTHON_PATH env var to override
 const PYTHON_CMD = process.env.PYTHON_PATH || 'python';
 
 async function extract(filePath, mime, _options = {}) {
@@ -134,7 +130,6 @@ function buildChunks(lines, tables = [], maxTokens = 300) {
 }
 
 function estimatePages(text) {
-  // Rough estimate: ~3000 chars per page
   if (!text) return 0;
   return Math.max(1, Math.ceil(text.length / 3000));
 }

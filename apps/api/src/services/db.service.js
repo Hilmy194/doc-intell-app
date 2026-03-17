@@ -1,11 +1,7 @@
-// File metadata CRUD via Supabase PostgreSQL
 const supabase = require('./supabase');
 
 const TABLE = 'files';
 
-/**
- * Insert a new file record into the database.
- */
 async function saveFileRecord(record) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -27,9 +23,6 @@ async function saveFileRecord(record) {
   return toClientFormat(data);
 }
 
-/**
- * Fetch all file records, ordered by newest first.
- */
 async function listFileRecords() {
   const { data, error } = await supabase
     .from(TABLE)
@@ -40,9 +33,6 @@ async function listFileRecords() {
   return (data || []).map(toClientFormat);
 }
 
-/**
- * Fetch file records belonging to a specific case.
- */
 async function listFileRecordsByCase(caseId) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -54,9 +44,6 @@ async function listFileRecordsByCase(caseId) {
   return (data || []).map(toClientFormat);
 }
 
-/**
- * Get a single file record by storedName.
- */
 async function getFileRecord(storedName) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -68,9 +55,6 @@ async function getFileRecord(storedName) {
   return toClientFormat(data);
 }
 
-/**
- * Update specific fields of a file record.
- */
 async function updateFileRecord(storedName, updates) {
   const dbUpdates = {};
   if (updates.status) dbUpdates.status = updates.status;
@@ -84,9 +68,6 @@ async function updateFileRecord(storedName, updates) {
   if (error) throw new Error(`DB update failed: ${error.message}`);
 }
 
-/**
- * Delete a file record by storedName.
- */
 async function deleteFileRecord(storedName) {
   const { error } = await supabase
     .from(TABLE)
@@ -96,7 +77,6 @@ async function deleteFileRecord(storedName) {
   if (error) throw new Error(`DB delete failed: ${error.message}`);
 }
 
-// Map snake_case DB columns to camelCase for the API response
 function toClientFormat(row) {
   return {
     id: row.id,

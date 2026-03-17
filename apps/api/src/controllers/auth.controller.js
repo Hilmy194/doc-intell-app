@@ -1,4 +1,3 @@
-// Auth controller — Supabase Auth based login & register
 const jwt = require('jsonwebtoken');
 const supabase = require('../services/supabase');
 
@@ -32,7 +31,6 @@ const handleLogin = async (req, res) => {
       name: data.user.user_metadata?.name || '',
     };
 
-    // Issue our own JWT so the rest of the API stays consistent
     const token = jwt.sign(
       { id: user.id, email: user.email },
       JWT_SECRET,

@@ -1,4 +1,3 @@
-// JWT authentication middleware
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';

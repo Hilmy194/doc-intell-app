@@ -208,3 +208,111 @@ export async function listCaseFiles(caseId) {
   if (!res.ok) throw new Error(data.error || 'Failed to list case files');
   return data.files || [];
 }
+
+// ── Chunks API ───────────────────────────────────────────────────────────────
+
+export async function saveChunks(storedName, { force = false } = {}) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/chunks/save`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ storedName, force }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to save chunks');
+  return data;
+}
+
+export async function listChunks(storedName) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/chunks/${encodeURIComponent(storedName)}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to list chunks');
+  return data;
+}
+
+// ── Entities API ─────────────────────────────────────────────────────────────
+
+export async function extractEntities(caseId) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/entities/extract`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ caseId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Entity extraction failed');
+  return data;
+}
+
+export async function listEntities(caseId) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/entities/${encodeURIComponent(caseId)}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to list entities');
+  return data;
+}
+
+// ── Graph API ────────────────────────────────────────────────────────────────
+
+export async function buildGraph(caseId) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/graph/build`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ caseId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Graph build failed');
+  return data;
+}
+
+export async function getGraph(caseId) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/graph/${encodeURIComponent(caseId)}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to get graph');
+  return data;
+}
+
+// ── Ontology API ─────────────────────────────────────────────────────────────
+
+export async function getOntology(caseId) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/cases/${encodeURIComponent(caseId)}/ontology`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to get ontology');
+  return data;
+}
+
+export async function updateOntology(caseId, rules) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/cases/${encodeURIComponent(caseId)}/ontology`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ rules }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to update ontology');
+  return data;
+}

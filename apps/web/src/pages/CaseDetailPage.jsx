@@ -236,15 +236,26 @@ export default function CaseDetailPage() {
               )}
             </h2>
             {uploadedFiles.length > 0 && (
-              <button
-                onClick={handleDownloadAll}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e2340] border border-[#2a3060] hover:border-[#4f7cff] rounded-lg text-xs text-[#8b9cc8] hover:text-white transition-colors"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download All
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate(`/cases/${caseId}/knowledge-graph`)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#4f7cff]/20 border border-[#4f7cff]/40 hover:bg-[#4f7cff]/30 rounded-lg text-xs text-[#4f7cff] hover:text-white transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Knowledge Graph
+                </button>
+                <button
+                  onClick={handleDownloadAll}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e2340] border border-[#2a3060] hover:border-[#4f7cff] rounded-lg text-xs text-[#8b9cc8] hover:text-white transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download All
+                </button>
+              </div>
             )}
           </div>
 

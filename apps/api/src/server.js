@@ -7,11 +7,13 @@ const extractRoutes = require('./routes/extract.routes');
 const filesRoutes = require('./routes/files.routes');
 const authRoutes = require('./routes/auth.routes');
 const casesRoutes = require('./routes/cases.routes');
+const chunksRoutes = require('./routes/chunks.routes');
+const entitiesRoutes = require('./routes/entities.routes');
+const graphRoutes = require('./routes/graph.routes');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Allow requests from the frontend (Vercel or local)
 const allowedOrigins = [
   process.env.WEB_URL,
   'http://localhost:5173',
@@ -26,19 +28,19 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cases', casesRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/extract', extractRoutes);
 app.use('/api/files', filesRoutes);
+app.use('/api/chunks', chunksRoutes);
+app.use('/api/entities', entitiesRoutes);
+app.use('/api/graph', graphRoutes);
 
-// Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Global error handler
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });

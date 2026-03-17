@@ -1,16 +1,15 @@
-// Cases controller — CRUD for case records
 const { v4: uuidv4 } = require('uuid');
 const {
   saveCaseRecord,
   listCaseRecords,
   getCaseRecord,
   updateCaseRecord,
+  updateOntologyRules,
   deleteCaseRecord,
 } = require('../services/cases.db.service');
 const { listFileRecordsByCase, deleteFileRecord } = require('../services/db.service');
 const { deleteFile: deleteFromStorage } = require('../services/storage.service');
 
-// GET /api/cases — list all cases with file counts
 const listCases = async (_req, res) => {
   try {
     const cases = await listCaseRecords();
@@ -21,7 +20,6 @@ const listCases = async (_req, res) => {
   }
 };
 
-// GET /api/cases/:caseId — get a single case
 const getCase = async (req, res) => {
   const { caseId } = req.params;
   try {
@@ -34,7 +32,6 @@ const getCase = async (req, res) => {
   }
 };
 
-// POST /api/cases — create a new case
 const createCase = async (req, res) => {
   const { name, description } = req.body;
   if (!name || !name.trim()) {
@@ -56,7 +53,6 @@ const createCase = async (req, res) => {
   }
 };
 
-// PATCH /api/cases/:caseId — update case name/description
 const updateCase = async (req, res) => {
   const { caseId } = req.params;
   const { name, description } = req.body;
@@ -74,19 +70,15 @@ const updateCase = async (req, res) => {
   }
 };
 
-// DELETE /api/cases/:caseId — delete case and all its files
 const deleteCase = async (req, res) => {
   const { caseId } = req.params;
   try {
     const existing = await getCaseRecord(caseId);
     if (!existing) return res.status(404).json({ error: 'Case not found' });
 
-    // Delete all files belonging to this case
     const files = await listFileRecordsByCase(caseId);
     for (const file of files) {
-      try {
-        await deleteFromStorage(file.storedName);
-      } catch (_) { /* best-effort storage cleanup */ }
+      try { await deleteFromStorage(file.storedName, file.caseId); } catch (_) {}
       await deleteFileRecord(file.storedName);
     }
 
@@ -98,7 +90,6 @@ const deleteCase = async (req, res) => {
   }
 };
 
-// GET /api/cases/:caseId/files — list files for a case
 const listCaseFiles = async (req, res) => {
   const { caseId } = req.params;
   try {
@@ -110,4 +101,41 @@ const listCaseFiles = async (req, res) => {
   }
 };
 
-module.exports = { listCases, getCase, createCase, updateCase, deleteCase, listCaseFiles };
+const getOntology = async (req, res) => {
+  const { caseId } = req.params;
+  try {
+    const record = await getCaseRecord(caseId);
+    if (!record) return res.status(404).json({ error: 'Case not found' });
+    return res.json({ ontologyRules: record.ontologyRules || [] });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+const updateOntology = async (req, res) => {
+  const { caseId } = req.params;
+  const { rules } = req.body;
+
+  if (!Array.isArray(rules)) {
+    return res.status(400).json({ error: 'rules must be an array' });
+  }
+
+  // Validate each rule has required fields
+  for (const r of rules) {
+    if (!r.from || !r.to || !r.relation) {
+      return res.status(400).json({ error: 'Each rule needs from, to, and relation fields' });
+    }
+  }
+
+  try {
+    const existing = await getCaseRecord(caseId);
+    if (!existing) return res.status(404).json({ error: 'Case not found' });
+
+    await updateOntologyRules(caseId, rules);
+    return res.json({ success: true, rules });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { listCases, getCase, createCase, updateCase, deleteCase, listCaseFiles, getOntology, updateOntology };
