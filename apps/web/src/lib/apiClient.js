@@ -7,6 +7,40 @@ function getAuthToken() {
   return localStorage.getItem('docintel_token');
 }
 
+async function parseApiResponse(res, fallbackMessage) {
+  const text = await res.text();
+  const body = text.trim();
+  const isHtml = body.startsWith('<!DOCTYPE') || body.startsWith('<html');
+
+  let data = null;
+  if (body) {
+    try {
+      data = JSON.parse(body);
+    } catch {
+      data = null;
+    }
+  }
+
+  if (!res.ok) {
+    if (data?.error) throw new Error(data.error);
+    if (isHtml) {
+      throw new Error(
+        `API mengembalikan HTML, bukan JSON. Cek VITE_API_URL di Vercel harus menuju backend API (contoh: https://your-api-domain), bukan URL frontend.`
+      );
+    }
+    throw new Error(`${fallbackMessage} (HTTP ${res.status})`);
+  }
+
+  if (isHtml) {
+    throw new Error(
+      'Response API berupa HTML. Konfigurasi VITE_API_URL kemungkinan salah atau endpoint API belum ter-deploy.'
+    );
+  }
+
+  if (data !== null) return data;
+  return {};
+}
+
 /**
  * Login user and return { token, user }
  */
@@ -204,8 +238,7 @@ export async function updateCase(caseId, { name, description }) {
 // Fetch files scoped to a specific case
 export async function listCaseFiles(caseId) {
   const res = await fetch(`${CASES_URL}/${encodeURIComponent(caseId)}/files`);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to list case files');
+  const data = await parseApiResponse(res, 'Failed to list case files');
   return data.files || [];
 }
 
@@ -221,8 +254,7 @@ export async function saveChunks(storedName, { force = false } = {}) {
     },
     body: JSON.stringify({ storedName, force }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to save chunks');
+  const data = await parseApiResponse(res, 'Failed to save chunks');
   return data;
 }
 
@@ -231,8 +263,7 @@ export async function listChunks(storedName) {
   const res = await fetch(`${BASE_URL}/api/chunks/${encodeURIComponent(storedName)}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to list chunks');
+  const data = await parseApiResponse(res, 'Failed to list chunks');
   return data;
 }
 
@@ -248,8 +279,7 @@ export async function extractEntities(caseId) {
     },
     body: JSON.stringify({ caseId }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Entity extraction failed');
+  const data = await parseApiResponse(res, 'Entity extraction failed');
   return data;
 }
 
@@ -258,8 +288,7 @@ export async function listEntities(caseId) {
   const res = await fetch(`${BASE_URL}/api/entities/${encodeURIComponent(caseId)}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to list entities');
+  const data = await parseApiResponse(res, 'Failed to list entities');
   return data;
 }
 
@@ -275,8 +304,7 @@ export async function buildGraph(caseId) {
     },
     body: JSON.stringify({ caseId }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Graph build failed');
+  const data = await parseApiResponse(res, 'Graph build failed');
   return data;
 }
 
@@ -285,8 +313,7 @@ export async function getGraph(caseId) {
   const res = await fetch(`${BASE_URL}/api/graph/${encodeURIComponent(caseId)}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to get graph');
+  const data = await parseApiResponse(res, 'Failed to get graph');
   return data;
 }
 
@@ -297,8 +324,7 @@ export async function getOntology(caseId) {
   const res = await fetch(`${BASE_URL}/api/cases/${encodeURIComponent(caseId)}/ontology`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to get ontology');
+  const data = await parseApiResponse(res, 'Failed to get ontology');
   return data;
 }
 
@@ -312,7 +338,6 @@ export async function updateOntology(caseId, rules) {
     },
     body: JSON.stringify({ rules }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to update ontology');
+  const data = await parseApiResponse(res, 'Failed to update ontology');
   return data;
 }

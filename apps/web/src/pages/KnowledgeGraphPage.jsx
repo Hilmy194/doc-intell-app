@@ -346,7 +346,7 @@ export default function KnowledgeGraphPage() {
                     placeholder="relation name"
                     className="px-2 py-1.5 bg-[#0d0f1e] border border-[#2a3060] rounded-lg text-xs text-white placeholder-[#8b9cc8]/50 focus:outline-none focus:border-[#4f7cff] w-36"
                   />
-                  <span className="text-[#8b9cc8] text-xs shrink-0">--></span>
+                  <span className="text-[#8b9cc8] text-xs shrink-0">{'-->'}</span>
                   <select
                     value={rule.to}
                     onChange={(e) => handleUpdateRule(i, "to", e.target.value)}
@@ -381,55 +381,6 @@ export default function KnowledgeGraphPage() {
             Add Rule
           </button>
         </div>
-
-        {/* Usage Guide */}
-        <details className="bg-[#1e2340] border border-[#2a3060] rounded-xl group">
-          <summary className="px-5 py-3 cursor-pointer flex items-center gap-2 text-sm text-[#8b9cc8] hover:text-white select-none">
-            <svg className="w-4 h-4 shrink-0 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            Cara penggunaan &amp; contoh ontologi
-          </summary>
-          <div className="px-5 pb-5 space-y-4 text-xs text-[#8b9cc8]">
-            <p className="text-white text-sm font-semibold mt-2">Langkah-langkah</p>
-            <ol className="list-decimal list-inside space-y-1.5 leading-relaxed">
-              <li>Pilih template ontologi (contoh: <span className="text-[#4f7cff]">Terrorism Watchlist (DTTOT)</span>) atau tambahkan rules manual.</li>
-              <li>Klik <span className="text-white font-medium">Save Ontology</span> — rules disimpan ke database untuk kasus ini.</li>
-              <li>Klik <span className="text-white font-medium">Run Full Pipeline</span> (atau jalankan tiap langkah satu per satu).</li>
-              <li>Graph akan muncul di bawah — node berwarna sesuai tipe entitas, garis = relasi.</li>
-            </ol>
-
-            <p className="text-white text-sm font-semibold pt-2">Contoh: Dokumen DTTOT</p>
-            <div className="bg-[#0d0f1e] rounded-lg p-4 space-y-2 font-mono text-[11px]">
-              <p className="text-[#8b9cc8]">// Teks dokumen (1 record = 1 chunk):</p>
-              <p className="text-green-300">"II. INDIVIDU:<br/>1. Nama : ENCEP NURJAMAN (I.D.Q.001);<br/>&nbsp;&nbsp; Nama alias : RIDUAN ISMUDIN alias HAMBALI;<br/>&nbsp;&nbsp; Tempat tanggal lahir : Cianjur, 14 Februari 1964;<br/>&nbsp;&nbsp; Kewarganegaraan : Indonesia;<br/>&nbsp;&nbsp; Alamat : Pamokolan RT 2/RW 4, Cianjur, Jawa Barat;"</p>
-              <p className="text-[#8b9cc8] pt-2">// AI mengekstrak entitas:</p>
-              <p className="text-orange-300">PERSON: "ENCEP NURJAMAN", "RIDUAN ISMUDIN", "HAMBALI"</p>
-              <p className="text-red-300">LOCATION: "Cianjur", "Indonesia", "Jawa Barat"</p>
-              <p className="text-green-300">DATE: "14 Februari 1964"</p>
-              <p className="text-cyan-300">DOCUMENT_ID: "I.D.Q.001"</p>
-              <p className="text-[#8b9cc8] pt-2">// Relasi yang terbentuk:</p>
-              <p className="text-yellow-300">ENCEP NURJAMAN --[alias_of]--&gt; RIDUAN ISMUDIN</p>
-              <p className="text-yellow-300">ENCEP NURJAMAN --[alias_of]--&gt; HAMBALI</p>
-              <p className="text-yellow-300">ENCEP NURJAMAN --[born_in]--&gt; Cianjur</p>
-              <p className="text-yellow-300">ENCEP NURJAMAN --[birth_date]--&gt; 14 Februari 1964</p>
-              <p className="text-yellow-300">ENCEP NURJAMAN --[nationality]--&gt; Indonesia</p>
-              <p className="text-yellow-300">ENCEP NURJAMAN --[address_in]--&gt; Jawa Barat</p>
-              <p className="text-yellow-300">ENCEP NURJAMAN --[identified_by]--&gt; I.D.Q.001</p>
-              <p className="text-[#8b9cc8] pt-3">// Jadi LOCATION "Indonesia" terhubung ke banyak individu via [nationality]</p>
-              <p className="text-[#8b9cc8]">// ORG "Jemaah Islamiyah" terhubung ke banyak individu via [member_of]</p>
-            </div>
-
-            <p className="text-white text-sm font-semibold pt-2">Tips</p>
-            <ul className="list-disc list-inside space-y-1 leading-relaxed">
-              <li>Setiap kasus bisa punya ontologi berbeda -- fleksibel sesuai jenis dokumen.</li>
-              <li>Dokumen DTTOT otomatis di-split per record (1. Nama:... 2. Nama:...) sehingga AI melihat data lengkap.</li>
-              <li>Jika AI tidak menemukan relasi, coba jalankan <span className="text-white">Step 3: Apply Rules</span> untuk menambah link via co-occurrence.</li>
-              <li>Gunakan filter tipe entitas (tombol berwarna) untuk fokus pada node tertentu di graph.</li>
-              <li>Nama relasi bebas, contoh: <span className="text-white">member_of</span>, <span className="text-white">nationality</span>, <span className="text-white">address_in</span>.</li>
-            </ul>
-          </div>
-        </details>
 
         {/* Pipeline Steps */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
