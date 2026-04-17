@@ -1,5 +1,6 @@
 // API client — all server communication goes through here
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const RAW_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const BASE_URL = RAW_BASE_URL.replace(/\/+$/, '');
 const UPLOAD_URL = `${BASE_URL}/api/upload`;
 const CASES_URL = `${BASE_URL}/api/cases`;
 
@@ -10,7 +11,7 @@ function getAuthToken() {
 async function parseApiResponse(res, fallbackMessage) {
   const text = await res.text();
   const body = text.trim();
-  const isHtml = body.startsWith('<!DOCTYPE') || body.startsWith('<html');
+  const isHtml = body.startsWith('<!DOCTYPE') || body.startsWith('<html') || body.startsWith('<');
 
   let data = null;
   if (body) {
@@ -25,7 +26,7 @@ async function parseApiResponse(res, fallbackMessage) {
     if (data?.error) throw new Error(data.error);
     if (isHtml) {
       throw new Error(
-        `API mengembalikan HTML, bukan JSON. Cek VITE_API_URL di Vercel harus menuju backend API (contoh: https://your-api-domain), bukan URL frontend.`
+        `API mengembalikan HTML (HTTP ${res.status}) dari ${res.url}. Kemungkinan VITE_API_URL salah, atau backend sedang crash/cold-start. Cek endpoint health: ${BASE_URL}/api/health`
       );
     }
     throw new Error(`${fallbackMessage} (HTTP ${res.status})`);
@@ -33,7 +34,7 @@ async function parseApiResponse(res, fallbackMessage) {
 
   if (isHtml) {
     throw new Error(
-      'Response API berupa HTML. Konfigurasi VITE_API_URL kemungkinan salah atau endpoint API belum ter-deploy.'
+      `Response API berupa HTML dari ${res.url}. Pastikan VITE_API_URL mengarah ke backend API dan endpoint health aktif: ${BASE_URL}/api/health`
     );
   }
 
@@ -190,6 +191,13 @@ export async function listCases() {
   return data.cases || [];
 }
 
+// Fetch single case
+export async function getCase(caseId) {
+  const res = await fetch(`${CASES_URL}/${encodeURIComponent(caseId)}`);
+  const data = await parseApiResponse(res, 'Failed to get case');
+  return data.case || null;
+}
+
 // Create a new case
 export async function createCase({ name, description }) {
   const token = getAuthToken();
@@ -339,5 +347,76 @@ export async function updateOntology(caseId, rules) {
     body: JSON.stringify({ rules }),
   });
   const data = await parseApiResponse(res, 'Failed to update ontology');
+  return data;
+}
+
+// ── Classify API ────────────────────────────────────────────────────────────
+
+export async function classifyFile(storedName, { force = false } = {}) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/classify/run`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ storedName, force }),
+  });
+  const data = await parseApiResponse(res, 'Failed to classify file');
+  return data;
+}
+
+// ── Knowledge API ───────────────────────────────────────────────────────────
+
+export async function indexKnowledge(caseId, { force = false } = {}) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/knowledge/index`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ caseId, force }),
+  });
+  const data = await parseApiResponse(res, 'Failed to index knowledge');
+  return data;
+}
+
+export async function searchKnowledge(caseId, query, { topK = 8, minScore = 0 } = {}) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/knowledge/search`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ caseId, query, topK, minScore }),
+  });
+  const data = await parseApiResponse(res, 'Failed to search knowledge');
+  return data;
+}
+
+export async function inspectEvidence(chunkId) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/knowledge/evidence/${encodeURIComponent(chunkId)}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await parseApiResponse(res, 'Failed to inspect evidence');
+  return data;
+}
+
+// ── Fact-check API ──────────────────────────────────────────────────────────
+
+export async function factCheckClaim(caseId, claim, { topK = 8, minScore = 0.1 } = {}) {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE_URL}/api/fact-check/claim`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ caseId, claim, topK, minScore }),
+  });
+  const data = await parseApiResponse(res, 'Failed to run fact-check');
   return data;
 }

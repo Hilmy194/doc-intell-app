@@ -247,6 +247,15 @@ export default function CaseDetailPage() {
                   Knowledge Graph
                 </button>
                 <button
+                  onClick={() => navigate(`/cases/${caseId}/fact-check`)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#22c55e]/20 border border-[#22c55e]/40 hover:bg-[#22c55e]/30 rounded-lg text-xs text-[#22c55e] hover:text-white transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Fact Checker
+                </button>
+                <button
                   onClick={handleDownloadAll}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e2340] border border-[#2a3060] hover:border-[#4f7cff] rounded-lg text-xs text-[#8b9cc8] hover:text-white transition-colors"
                 >

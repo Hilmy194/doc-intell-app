@@ -30,7 +30,7 @@ const handleUpload = async (req, res) => {
 
       // Build file record and persist to Supabase DB
       const record = {
-        id: `f_${uuidv4().replace(/-/g, '').slice(0, 12)}`,
+        id: uuidv4(),
         name: file.originalname,
         storedName,
         mime: file.mimetype,

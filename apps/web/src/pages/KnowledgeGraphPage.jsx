@@ -2,6 +2,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
+  getCase,
   listCaseFiles,
   saveChunks,
   extractEntities,
@@ -101,15 +102,12 @@ export default function KnowledgeGraphPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [casesRes, filesRes, ontologyRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/cases/${caseId}`),
+        const [caseRes, filesRes, ontologyRes] = await Promise.all([
+          getCase(caseId).catch(() => null),
           listCaseFiles(caseId),
           getOntology(caseId).catch(() => ({ ontologyRules: [] })),
         ]);
-        if (casesRes.ok) {
-          const d = await casesRes.json();
-          setCaseInfo(d.case);
-        }
+        if (caseRes) setCaseInfo(caseRes);
         setFiles(filesRes);
         setOntologyRules(ontologyRes.ontologyRules || []);
       } catch {/* non-fatal */}
@@ -410,6 +408,12 @@ export default function KnowledgeGraphPage() {
             className="px-4 py-2 bg-[#4f7cff] hover:bg-[#3d6ae8] text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40"
           >
             {loading ? "Processing..." : "Run Full Pipeline"}
+          </button>
+          <button
+            onClick={() => navigate(`/cases/${caseId}/fact-check`)}
+            className="px-4 py-2 bg-[#22c55e]/20 border border-[#22c55e]/40 hover:bg-[#22c55e]/30 text-[#22c55e] hover:text-white rounded-lg text-sm transition-colors"
+          >
+            Open Fact Checker
           </button>
           <button
             onClick={refreshGraph}

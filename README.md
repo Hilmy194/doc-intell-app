@@ -82,6 +82,42 @@ npm run dev:web   # Frontend on port 5173
 | GET | `/api/extract/tools` | No | List extractors |
 | GET | `/api/health` | No | Health check |
 
+### New Intelligence Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/classify/run` | Yes | Classify a file (`storedName`) |
+| POST | `/api/knowledge/index` | Yes | Index case chunks into knowledge table |
+| POST | `/api/knowledge/search` | Yes | Semantic + keyword retrieval by claim/query |
+| GET | `/api/knowledge/evidence/:chunkId` | Yes | Inspect indexed evidence chunk |
+| POST | `/api/fact-check/claim` | Yes | Grounded fact-check with verdict + citations |
+
+## Recommended Processing Flow
+
+1. Create case
+2. Upload files to case
+3. Extract preview (optional)
+4. Save chunks (`/api/chunks/save`)
+5. Classify files (`/api/classify/run`)
+6. Extract entities (`/api/entities/extract`)
+7. Build graph (`/api/graph/build`)
+8. Index knowledge (`/api/knowledge/index`)
+9. Fact-check claims (`/api/fact-check/claim`)
+
+## Database Migrations (Order)
+
+Run in Supabase SQL Editor in this order:
+
+1. `supabase_migration_knowledge_graph.sql`
+2. `supabase_migration_prod_document_intel.sql`
+
+The second migration adds:
+- `document_classifications`
+- `extraction_schemas`
+- `extraction_runs`
+- `knowledge_chunks` (with vector column)
+- `fact_check_runs`
+
 ## Project Structure
 
 ```

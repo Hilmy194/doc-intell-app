@@ -40,10 +40,10 @@ const createCase = async (req, res) => {
 
   try {
     const record = {
-      id: `case_${uuidv4().replace(/-/g, '').slice(0, 12)}`,
+      id: uuidv4(),
       name: name.trim(),
       description: description?.trim() || null,
-      userId: req.user?.userId || null,
+      userId: req.user?.id || null,
     };
     const saved = await saveCaseRecord(record);
     return res.status(201).json({ case: saved });

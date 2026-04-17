@@ -1,0 +1,3 @@
+kreuzberg
+# Docling is optional in local dev but required for production parse parity
+docling

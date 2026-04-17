@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import CasesPage from './pages/CasesPage';
 import CaseDetailPage from './pages/CaseDetailPage';
 import KnowledgeGraphPage from './pages/KnowledgeGraphPage';
+import FactCheckerPage from './pages/FactCheckerPage';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -38,6 +39,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             element={
               <ProtectedRoute>
                 <KnowledgeGraphPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cases/:caseId/fact-check"
+            element={
+              <ProtectedRoute>
+                <FactCheckerPage />
               </ProtectedRoute>
             }
           />

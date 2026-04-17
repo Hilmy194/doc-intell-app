@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
-# Install kreuzberg globally (no venv needed in container)
-RUN pip3 install kreuzberg --break-system-packages
+COPY scripts/requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt --break-system-packages
 
 WORKDIR /app
 
