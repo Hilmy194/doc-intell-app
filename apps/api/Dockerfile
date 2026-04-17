@@ -1,11 +1,20 @@
 # ── Build stage ──────────────────────────────────────────────────────────────
 FROM node:20-slim AS base
 
-# Install Python 3, pip, and Tesseract OCR (needed by kreuzberg)
+# Install Python, OCR runtime, and native build toolchain.
+# Kreuzberg may compile Rust/C extensions during pip install.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
+    python3-dev \
     python3-venv \
+    build-essential \
+    gcc \
+    g++ \
+    make \
+    pkg-config \
+    rustc \
+    cargo \
     tesseract-ocr \
     tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
