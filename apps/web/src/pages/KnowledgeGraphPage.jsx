@@ -10,6 +10,7 @@ import {
   buildGraph,
   getOntology,
   updateOntology,
+  indexKnowledge,
 } from "../lib/apiClient";
 
 const ENTITY_COLORS = {
@@ -66,6 +67,7 @@ const STEPS = [
   { key: "chunks",   label: "1. Save Chunks",     desc: "Parse files -> persist text chunks" },
   { key: "entities", label: "2. Extract Entities", desc: "AI extracts entities & applies your ontology" },
   { key: "graph",    label: "3. Apply Rules",      desc: "Co-occurrence pass: add links from ontology rules" },
+  { key: "knowledge",label: "4. Index Knowledge",  desc: "Embed chunks for semantic retrieval and fact-checking" },
 ];
 
 export default function KnowledgeGraphPage() {
@@ -193,6 +195,12 @@ export default function KnowledgeGraphPage() {
           graph: res.relationsCreated > 0
             ? `+${res.relationsCreated} links added`
             : res.message || "No new links (save ontology first)",
+        }));
+      } else if (step === "knowledge") {
+        const res = await indexKnowledge(caseId, { force: true });
+        setStepResults((p) => ({
+          ...p,
+          knowledge: `${res.data?.indexedCount || 0} chunks indexed`,
         }));
       }
       await refreshGraph();
