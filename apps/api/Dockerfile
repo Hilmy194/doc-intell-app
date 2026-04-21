@@ -13,11 +13,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     make \
     pkg-config \
-    rustc \
-    cargo \
+    curl \
+    ca-certificates \
     tesseract-ocr \
     tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
+
+# Debian's cargo/rustc can be too old for crates using Rust edition 2024.
+# Install a recent Rust toolchain via rustup so pip (maturin) builds succeed.
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable
 
 COPY scripts/requirements.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt --break-system-packages
