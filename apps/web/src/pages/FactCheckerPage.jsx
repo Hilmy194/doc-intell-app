@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { factCheckClaim } from '../lib/apiClient';
+import ThemeToggle from '../components/ThemeToggle';
 
 const VERDICT_STYLES = {
   supported: 'bg-green-900/30 text-green-300 border-green-500/40',
@@ -12,7 +13,7 @@ const VERDICT_STYLES = {
 function ConfidenceBar({ value }) {
   const pct = Math.max(0, Math.min(100, Math.round((Number(value) || 0) * 100)));
   return (
-    <div className="w-full bg-[#2a3060] rounded-full h-2 overflow-hidden">
+    <div className="w-full rounded-full h-2 overflow-hidden" style={{ backgroundColor: "var(--border-color)" }}>
       <div className="h-full bg-[#4f7cff]" style={{ width: `${pct}%` }} />
     </div>
   );
@@ -47,46 +48,58 @@ export default function FactCheckerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0f1e] text-white px-6 py-8 font-sans">
+    <div
+      className="min-h-screen px-6 py-8 font-sans"
+      style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
+    >
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">Fact Checker</h1>
-            <p className="text-sm text-[#8b9cc8] mt-1">Grounded verification using indexed evidence from this case</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => (caseId ? navigate(`/cases/${caseId}`) : navigate(-1))}
+              className="shrink-0 p-1.5 rounded transition-colors"
+              style={{ color: "var(--text-secondary)" }}
+              title="Back"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-xl font-bold">Fact Checker</h1>
+              <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Grounded verification using indexed evidence from this case</p>
+            </div>
           </div>
-          <button
-            onClick={() => navigate(`/cases/${caseId}/knowledge-graph`)}
-            className="px-3 py-1.5 text-xs border border-[#2a3060] rounded-lg text-[#8b9cc8] hover:text-white hover:border-[#4f7cff]"
-          >
-            Back to Knowledge Graph
-          </button>
+          <ThemeToggle />
         </div>
 
         {error && (
-          <div className="bg-red-900/30 border border-red-500/40 rounded-lg px-4 py-3 text-sm text-red-300">
+          <div className="rounded-lg px-4 py-3 text-sm" style={{ backgroundColor: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.4)", color: "var(--text-primary)" }}>
             {error}
           </div>
         )}
 
-        <div className="bg-[#1e2340] border border-[#2a3060] rounded-xl p-5 space-y-4">
-          <label className="block text-xs text-[#8b9cc8] uppercase tracking-wider">Claim / Statement</label>
+        <div className="rounded-xl p-5 space-y-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-color)" }}>
+          <label className="block text-xs uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>Claim / Statement</label>
           <textarea
             value={claim}
             onChange={(e) => setClaim(e.target.value)}
             rows={5}
             placeholder="Example: PT ABC signed the contract on 10 January 2025 and paid IDR 2 billion."
-            className="w-full bg-[#0d0f1e] border border-[#2a3060] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#4f7cff]"
+            className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
           />
 
           <div className="flex items-center gap-3">
-            <label className="text-xs text-[#8b9cc8]">Top-K Evidence</label>
+            <label className="text-xs" style={{ color: "var(--text-secondary)" }}>Top-K Evidence</label>
             <input
               type="number"
               value={topK}
               min={3}
               max={20}
               onChange={(e) => setTopK(e.target.value)}
-              className="w-24 bg-[#0d0f1e] border border-[#2a3060] rounded px-2 py-1 text-sm"
+              className="w-24 rounded px-2 py-1 text-sm"
+              style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
             />
             <button
               onClick={onRun}
@@ -117,21 +130,21 @@ export default function FactCheckerPage() {
               )}
             </div>
 
-            <div className="bg-[#1e2340] border border-[#2a3060] rounded-xl p-4">
+            <div className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-color)" }}>
               <h2 className="text-sm font-semibold mb-3">Evidence ({result.retrieved_context_count})</h2>
               <div className="space-y-3">
                 {(result.evidence || []).map((e, idx) => (
-                  <details key={`${e.chunkId}-${idx}`} className="border border-[#2a3060] rounded-lg p-3 bg-[#141627]">
-                    <summary className="cursor-pointer text-sm text-[#c9d5f5]">
+                  <details key={`${e.chunkId}-${idx}`} className="border rounded-lg p-3" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-base)" }}>
+                    <summary className="cursor-pointer text-sm" style={{ color: "var(--text-primary)" }}>
                       [{idx + 1}] {e.fileName || 'Unknown file'} • chunk {e.chunkIndex ?? '-'} • score {Number(e.score || 0).toFixed(3)}
                     </summary>
-                    <p className="text-xs text-[#8b9cc8] mt-2">chunkId: {e.chunkId}</p>
-                    {e.page ? <p className="text-xs text-[#8b9cc8]">page: {e.page}</p> : null}
-                    <pre className="whitespace-pre-wrap mt-2 text-sm text-[#d7e2ff]">{e.content}</pre>
+                    <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>chunkId: {e.chunkId}</p>
+                    {e.page ? <p className="text-xs" style={{ color: "var(--text-secondary)" }}>page: {e.page}</p> : null}
+                    <pre className="whitespace-pre-wrap mt-2 text-sm" style={{ color: "var(--text-primary)" }}>{e.content}</pre>
                   </details>
                 ))}
                 {(!result.evidence || result.evidence.length === 0) && (
-                  <p className="text-sm text-[#8b9cc8]">No strong evidence selected for this claim.</p>
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No strong evidence selected for this claim.</p>
                 )}
               </div>
             </div>

@@ -149,6 +149,48 @@ export async function extractFile(storedName, mime, tool = 'kreuzberg', options 
   return data;
 }
 
+export async function processFile({ storedName, mime, engine = 'liteparse', mode = 'parse', options = {}, file = null }) {
+  const token = getAuthToken();
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
+  let res;
+  if (file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('engine', engine);
+    formData.append('mode', mode);
+    formData.append('options', JSON.stringify(options || {}));
+    if (storedName) formData.append('storedName', storedName);
+    if (mime) formData.append('mime', mime);
+
+    res = await fetch(`${BASE_URL}/api/process`, {
+      method: 'POST',
+      headers: {
+        ...authHeaders,
+      },
+      body: formData,
+    });
+  } else {
+    res = await fetch(`${BASE_URL}/api/process`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders,
+      },
+      body: JSON.stringify({ storedName, mime, engine, mode, options }),
+    });
+  }
+
+  const data = await parseApiResponse(res, 'Processing failed');
+  return data;
+}
+
+export async function listProcessingEngines() {
+  const res = await fetch(`${BASE_URL}/api/process/engines`);
+  const data = await parseApiResponse(res, 'Failed to list processing engines');
+  return data;
+}
+
 // Delete an uploaded file
 export async function deleteFile(storedName) {
   const token = getAuthToken();

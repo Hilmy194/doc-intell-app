@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import ThemeToggle from "../components/ThemeToggle";
 import {
   getCase,
   listCaseFiles,
@@ -74,6 +76,7 @@ export default function KnowledgeGraphPage() {
   const { caseId } = useParams();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const [caseInfo, setCaseInfo] = useState(null);
   const [files, setFiles] = useState([]);
@@ -243,7 +246,10 @@ export default function KnowledgeGraphPage() {
   const handleLogout = () => { logout(); navigate("/login", { replace: true }); };
 
   return (
-    <div className="min-h-screen bg-[#0d0f1e] text-white px-6 py-8 font-sans">
+    <div
+      className="min-h-screen px-6 py-8 font-sans"
+      style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
+    >
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header */}
@@ -251,7 +257,8 @@ export default function KnowledgeGraphPage() {
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => navigate(`/cases/${caseId}`)}
-              className="shrink-0 p-1.5 text-[#8b9cc8] hover:text-white rounded hover:bg-[#2a3060] transition-colors"
+              className="shrink-0 p-1.5 rounded transition-colors"
+              style={{ color: "var(--text-secondary)" }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -259,19 +266,21 @@ export default function KnowledgeGraphPage() {
             </button>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[#8b9cc8] truncate">{caseInfo?.name || "Case"} /</span>
-                <h1 className="text-xl font-bold text-white truncate">Knowledge Graph</h1>
+                <span className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>{caseInfo?.name || "Case"} /</span>
+                <h1 className="text-xl font-bold truncate">Knowledge Graph</h1>
               </div>
-              <p className="text-sm text-[#8b9cc8] mt-0.5">
+              <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
                 {files.length} file{files.length !== 1 ? "s" : ""} in this case
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            {user && <span className="text-xs text-[#8b9cc8]">{user.email}</span>}
+            {user && <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{user.email}</span>}
+            <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e2340] border border-[#2a3060] hover:border-red-500/50 rounded-lg text-xs text-[#8b9cc8] hover:text-red-400 transition-colors"
+              className="px-3 py-1.5 text-xs rounded-lg"
+              style={{ border: "1px solid var(--border-color)", backgroundColor: "var(--bg-card)", color: "var(--text-secondary)" }}
             >
               Logout
             </button>
@@ -280,8 +289,8 @@ export default function KnowledgeGraphPage() {
 
         {/* Error banner */}
         {error && (
-          <div className="bg-red-900/30 border border-red-500/40 rounded-lg px-4 py-3 flex items-start gap-3">
-            <p className="text-red-300 text-sm flex-1">{error}</p>
+          <div className="rounded-lg px-4 py-3 flex items-start gap-3" style={{ backgroundColor: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.4)" }}>
+            <p className="text-sm flex-1" style={{ color: "var(--text-primary)" }}>{error}</p>
             <button onClick={() => setError(null)} className="text-red-400 hover:text-white shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -291,11 +300,11 @@ export default function KnowledgeGraphPage() {
         )}
 
         {/* â”€â”€ Ontology Editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="bg-[#1e2340] border border-[#2a3060] rounded-xl p-5 space-y-4">
+        <div className="rounded-xl p-5 space-y-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-color)" }}>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-sm font-semibold text-white">Ontology Rules</h2>
-              <p className="text-xs text-[#8b9cc8] mt-0.5">
+              <h2 className="text-sm font-semibold">Ontology Rules</h2>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
                 Define how entities relate in this case. The AI will use these rules when extracting relationships.
               </p>
             </div>
@@ -314,19 +323,21 @@ export default function KnowledgeGraphPage() {
 
           {/* Preset templates */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-[#8b9cc8]">Templates:</span>
+            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Templates:</span>
             {Object.keys(PRESETS).map((name) => (
               <button
                 key={name}
                 onClick={() => handleApplyPreset(name)}
-                className="px-2.5 py-1 text-xs rounded-md bg-[#2a3060] border border-[#2a3060] hover:border-[#4f7cff]/50 text-[#8b9cc8] hover:text-white transition-colors"
+                className="px-2.5 py-1 text-xs rounded-md transition-colors"
+                style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-secondary)" }}
               >
                 {name}
               </button>
             ))}
             <button
               onClick={() => { setOntologyRules([]); setOntologySaved(false); }}
-              className="px-2.5 py-1 text-xs rounded-md bg-[#2a3060] border border-[#2a3060] hover:border-red-500/50 text-[#8b9cc8] hover:text-red-400 transition-colors"
+              className="px-2.5 py-1 text-xs rounded-md transition-colors"
+              style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-secondary)" }}
             >
               Clear
             </button>
@@ -340,29 +351,33 @@ export default function KnowledgeGraphPage() {
                   <select
                     value={rule.from}
                     onChange={(e) => handleUpdateRule(i, "from", e.target.value)}
-                    className="px-2 py-1.5 bg-[#0d0f1e] border border-[#2a3060] rounded-lg text-xs text-white focus:outline-none focus:border-[#4f7cff] min-w-[130px]"
+                    className="px-2 py-1.5 rounded-lg text-xs min-w-[130px]"
+                    style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
                   >
                     {ENTITY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
-                  <span className="text-[#8b9cc8] text-xs shrink-0">--</span>
+                  <span className="text-xs shrink-0" style={{ color: "var(--text-secondary)" }}>--</span>
                   <input
                     type="text"
                     value={rule.relation}
                     onChange={(e) => handleUpdateRule(i, "relation", e.target.value)}
                     placeholder="relation name"
-                    className="px-2 py-1.5 bg-[#0d0f1e] border border-[#2a3060] rounded-lg text-xs text-white placeholder-[#8b9cc8]/50 focus:outline-none focus:border-[#4f7cff] w-36"
+                    className="px-2 py-1.5 rounded-lg text-xs w-36"
+                    style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
                   />
-                  <span className="text-[#8b9cc8] text-xs shrink-0">{'-->'}</span>
+                  <span className="text-xs shrink-0" style={{ color: "var(--text-secondary)" }}>{'-->'}</span>
                   <select
                     value={rule.to}
                     onChange={(e) => handleUpdateRule(i, "to", e.target.value)}
-                    className="px-2 py-1.5 bg-[#0d0f1e] border border-[#2a3060] rounded-lg text-xs text-white focus:outline-none focus:border-[#4f7cff] min-w-[130px]"
+                    className="px-2 py-1.5 rounded-lg text-xs min-w-[130px]"
+                    style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
                   >
                     {ENTITY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <button
                     onClick={() => handleRemoveRule(i)}
-                    className="p-1.5 text-[#8b9cc8] hover:text-red-400 rounded hover:bg-red-900/20 transition-colors shrink-0"
+                    className="p-1.5 rounded transition-colors shrink-0"
+                    style={{ color: "var(--text-secondary)" }}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -372,14 +387,15 @@ export default function KnowledgeGraphPage() {
               ))}
             </div>
           ) : (
-            <p className="text-xs text-[#8b9cc8]/60 italic">
+            <p className="text-xs italic" style={{ color: "var(--text-muted)" }}>
               No rules defined -- select a template or add rules manually. Without rules the AI uses its own judgment.
             </p>
           )}
 
           <button
             onClick={handleAddRule}
-            className="flex items-center gap-1.5 text-xs text-[#8b9cc8] hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-xs transition-colors"
+            style={{ color: "var(--text-secondary)" }}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -391,9 +407,9 @@ export default function KnowledgeGraphPage() {
         {/* Pipeline Steps */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {STEPS.map((step) => (
-            <div key={step.key} className="bg-[#1e2340] border border-[#2a3060] rounded-xl p-4 flex flex-col gap-2">
-              <h3 className="text-sm font-semibold text-white">{step.label}</h3>
-              <p className="text-xs text-[#8b9cc8]">{step.desc}</p>
+            <div key={step.key} className="rounded-xl p-4 flex flex-col gap-2" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-color)" }}>
+              <h3 className="text-sm font-semibold">{step.label}</h3>
+              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{step.desc}</p>
               {stepResults[step.key] && (
                 <p className="text-xs text-green-400">{stepResults[step.key]}</p>
               )}
@@ -425,12 +441,13 @@ export default function KnowledgeGraphPage() {
           </button>
           <button
             onClick={refreshGraph}
-            className="px-4 py-2 bg-[#1e2340] border border-[#2a3060] hover:border-[#4f7cff] text-[#8b9cc8] hover:text-white rounded-lg text-sm transition-colors"
+            className="px-4 py-2 rounded-lg text-sm transition-colors"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-color)", color: "var(--text-secondary)" }}
           >
             Refresh Graph
           </button>
           {stats && (
-            <span className="text-xs text-[#8b9cc8]">
+            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
               {stats.uniqueNodes} nodes &middot; {stats.uniqueLinks} links
             </span>
           )}
@@ -443,9 +460,14 @@ export default function KnowledgeGraphPage() {
               onClick={() => setFilter("ALL")}
               className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
                 filter === "ALL"
-                  ? "bg-white/10 text-white border-white/30"
-                  : "bg-[#1e2340] text-[#8b9cc8] border-[#2a3060] hover:border-white/30"
+                  ? "border-white/30"
+                  : "border"
               }`}
+              style={{
+                backgroundColor: filter === "ALL" ? "rgba(79,124,255,0.18)" : "var(--bg-card)",
+                borderColor: filter === "ALL" ? "rgba(79,124,255,0.4)" : "var(--border-color)",
+                color: filter === "ALL" ? "var(--text-primary)" : "var(--text-secondary)",
+              }}
             >
               All
             </button>
@@ -456,8 +478,8 @@ export default function KnowledgeGraphPage() {
                 className="px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors"
                 style={{
                   color: ENTITY_COLORS[type] || "#6b7280",
-                  background: filter === type ? `${ENTITY_COLORS[type] || "#6b7280"}22` : "rgba(30,35,64,1)",
-                  borderColor: filter === type ? ENTITY_COLORS[type] || "#6b7280" : "rgba(42,48,96,1)",
+                  background: filter === type ? `${ENTITY_COLORS[type] || "#6b7280"}22` : "var(--bg-card)",
+                  borderColor: filter === type ? ENTITY_COLORS[type] || "#6b7280" : "var(--border-color)",
                 }}
               >
                 {type} ({graphData.nodes.filter((n) => n.type === type).length})
@@ -469,11 +491,11 @@ export default function KnowledgeGraphPage() {
         {/* Graph Visualization */}
         <div
           ref={containerRef}
-          className="bg-[#1e2340] border border-[#2a3060] rounded-xl overflow-hidden"
-          style={{ height: 520 }}
+          className="rounded-xl overflow-hidden"
+          style={{ height: 520, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-color)" }}
         >
           {filteredData.nodes.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-[#8b9cc8]">
+            <div className="flex items-center justify-center h-full" style={{ color: "var(--text-secondary)" }}>
               <div className="text-center space-y-2">
                 <svg className="w-12 h-12 mx-auto opacity-25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -494,7 +516,7 @@ export default function KnowledgeGraphPage() {
               linkColor={() => "rgba(139,156,200,0.35)"}
               linkDirectionalArrowLength={4}
               linkDirectionalArrowRelPos={1}
-              backgroundColor="#1e2340"
+              backgroundColor={theme === "dark" ? "#1e2340" : "#f8fafc"}
               nodeCanvasObject={(node, ctx, globalScale) => {
                 const label = node.name;
                 const fontSize = 12 / globalScale;
@@ -510,7 +532,7 @@ export default function KnowledgeGraphPage() {
               }}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-[#8b9cc8]">
+            <div className="flex items-center justify-center h-full" style={{ color: "var(--text-secondary)" }}>
               <p className="text-sm">Loading graph renderer...</p>
             </div>
           )}
@@ -519,21 +541,21 @@ export default function KnowledgeGraphPage() {
         {/* Entity Table */}
         {graphData.nodes.length > 0 && (
           <div>
-            <h2 className="text-sm font-semibold text-white mb-3">
+            <h2 className="text-sm font-semibold mb-3">
               Extracted Entities
-              <span className="text-[#8b9cc8] font-normal ml-1">({graphData.nodes.length})</span>
+              <span className="font-normal ml-1" style={{ color: "var(--text-secondary)" }}>({graphData.nodes.length})</span>
             </h2>
-            <div className="bg-[#1e2340] border border-[#2a3060] rounded-xl overflow-hidden max-h-72 overflow-y-auto">
+            <div className="rounded-xl overflow-hidden max-h-72 overflow-y-auto" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-color)" }}>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[#2a3060] text-[#8b9cc8] text-xs uppercase tracking-wider sticky top-0 bg-[#1e2340]">
+                  <tr className="border-b text-xs uppercase tracking-wider sticky top-0" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)", backgroundColor: "var(--bg-card)" }}>
                     <th className="text-left px-4 py-3 font-medium">Type</th>
                     <th className="text-left px-4 py-3 font-medium">Value</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredData.nodes.map((n, i) => (
-                    <tr key={i} className="border-b border-[#2a3060]/50 last:border-0">
+                    <tr key={i} className="border-b last:border-0" style={{ borderColor: "var(--border-color)" }}>
                       <td className="px-4 py-2">
                         <span
                           className="px-2 py-0.5 rounded text-xs font-semibold"
@@ -545,7 +567,7 @@ export default function KnowledgeGraphPage() {
                           {n.type}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-white">{n.name}</td>
+                      <td className="px-4 py-2" style={{ color: "var(--text-primary)" }}>{n.name}</td>
                     </tr>
                   ))}
                 </tbody>

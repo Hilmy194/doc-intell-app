@@ -13,6 +13,7 @@ const graphRoutes = require('./routes/graph.routes');
 const classifyRoutes = require('./routes/classify.routes');
 const knowledgeRoutes = require('./routes/knowledge.routes');
 const factcheckRoutes = require('./routes/factcheck.routes');
+const processRoutes = require('./routes/process.routes');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -45,6 +46,7 @@ app.use('/api/graph', graphRoutes);
 app.use('/api/classify', classifyRoutes);
 app.use('/api/knowledge', knowledgeRoutes);
 app.use('/api/fact-check', factcheckRoutes);
+app.use('/api/process', processRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

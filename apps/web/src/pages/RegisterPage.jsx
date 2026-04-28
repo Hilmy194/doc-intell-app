@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { registerUser } from '../lib/apiClient';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -40,44 +41,48 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0f1e] flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}>
       <div className="w-full max-w-md">
+        <div className="flex justify-end mb-4">
+          <ThemeToggle />
+        </div>
         {/* Logo / Title */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-[#4f7cff]/20 mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4" style={{ backgroundColor: "rgba(79,124,255,0.18)" }}>
             <svg className="w-7 h-7 text-[#4f7cff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white">Document Intelligence</h1>
-          <p className="text-sm text-[#8b9cc8] mt-1">Create your account</p>
+          <h1 className="text-2xl font-bold">Document Intelligence</h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Create your account</p>
         </div>
 
         {/* Register Card */}
-        <div className="bg-[#1e2340] border border-[#2a3060] rounded-xl p-6">
+        <div className="rounded-xl p-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-color)" }}>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-900/30 border border-red-500/40 rounded-lg px-4 py-3 text-red-300 text-sm">
+              <div className="rounded-lg px-4 py-3 text-sm" style={{ backgroundColor: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.4)", color: "var(--text-primary)" }}>
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-[#8b9cc8] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-secondary)" }}>
                 Name
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#0d0f1e] border border-[#2a3060] rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#4f7cff] placeholder:text-[#5c6290] transition-colors"
+                className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors"
+                style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
                 placeholder="Your name"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#8b9cc8] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-secondary)" }}>
                 Email
               </label>
               <input
@@ -86,13 +91,14 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoFocus
-                className="w-full bg-[#0d0f1e] border border-[#2a3060] rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#4f7cff] placeholder:text-[#5c6290] transition-colors"
+                className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors"
+                style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#8b9cc8] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-secondary)" }}>
                 Password
               </label>
               <input
@@ -100,13 +106,14 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-[#0d0f1e] border border-[#2a3060] rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#4f7cff] placeholder:text-[#5c6290] transition-colors"
+                className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors"
+                style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
                 placeholder="Min. 6 characters"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#8b9cc8] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-secondary)" }}>
                 Confirm Password
               </label>
               <input
@@ -114,7 +121,8 @@ export default function RegisterPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full bg-[#0d0f1e] border border-[#2a3060] rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#4f7cff] placeholder:text-[#5c6290] transition-colors"
+                className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors"
+                style={{ backgroundColor: "var(--bg-base)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}
                 placeholder="••••••••"
               />
             </div>
@@ -136,7 +144,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-[#8b9cc8] mt-4">
+          <p className="text-center text-sm mt-4" style={{ color: "var(--text-secondary)" }}>
             Already have an account?{' '}
             <Link to="/login" className="text-[#4f7cff] hover:underline font-medium">
               Sign in
