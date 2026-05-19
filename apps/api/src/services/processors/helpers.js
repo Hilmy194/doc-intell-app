@@ -12,18 +12,23 @@ function normalizeMode(mode = 'parse') {
 function ensureStandardResult(result = {}, metadataPatch = {}) {
   const metadata = {
     engine: result?.metadata?.engine || metadataPatch.engine || '',
+    selected_engine: metadataPatch.selected_engine || metadataPatch.engine || '',
+    actual_engine_used: result?.metadata?.engine || metadataPatch.engine || '',
+    fallback_used: metadataPatch.fallback_used ?? false,
     processing_time: Number(result?.metadata?.processing_time || metadataPatch.processing_time || 0),
+    processing_time_ms: Number(result?.metadata?.processing_time || metadataPatch.processing_time || 0),
     fallback: result?.metadata?.fallback ?? metadataPatch.fallback ?? null,
-    warnings: Array.isArray(result?.metadata?.warnings)
-      ? result.metadata.warnings
-      : Array.isArray(metadataPatch.warnings)
-        ? metadataPatch.warnings
-        : [],
     attempted_engines: Array.isArray(result?.metadata?.attempted_engines)
       ? result.metadata.attempted_engines
       : Array.isArray(metadataPatch.attempted_engines)
         ? metadataPatch.attempted_engines
         : [],
+    warnings: Array.isArray(result?.metadata?.warnings)
+      ? result.metadata.warnings
+      : Array.isArray(metadataPatch.warnings)
+        ? metadataPatch.warnings
+        : [],
+    error_message: metadataPatch.error_message || null,
   };
 
   return {

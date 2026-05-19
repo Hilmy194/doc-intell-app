@@ -76,11 +76,21 @@ async function handleProcess(req, res) {
   const mode = (req.body?.mode || 'parse').toLowerCase();
   const rawOptions = safeJsonParse(req.body?.options, req.body?.options || {});
   const options = normalizeOptions(rawOptions);
+  const schema = safeJsonParse(req.body?.schema, {});
 
   let fileCtx = null;
 
   try {
     fileCtx = await resolveInputFile(req);
+
+    if (!fs.existsSync(fileCtx.tempPath)) {
+      throw new Error(`Input file does not exist at resolved path: ${fileCtx.tempPath}`);
+    }
+
+    if (mode === 'extract' && schema && typeof schema === 'object') {
+      options.schema = schema;
+    }
+
     const result = await processDocument({
       engineName: engine,
       mode,

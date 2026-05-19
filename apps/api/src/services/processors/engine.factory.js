@@ -15,6 +15,7 @@ const FALLBACK_MAP = {
   liteparse: 'docling',
   opendataloader_pdf: 'docling',
   kreuzberg: 'liteparse',
+  docling: 'kreuzberg',
 };
 
 function getEngine(engineName = 'liteparse') {

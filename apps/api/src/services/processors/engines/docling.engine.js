@@ -9,42 +9,21 @@ class DoclingEngine extends BaseParser {
 
   async parse(filePath, ctx = {}) {
     const startedAt = Date.now();
-    try {
-      const extracted = await doclingExtractor.extract(filePath, ctx.mime, ctx.options || {});
-      return ensureStandardResult({
-        text: extracted?.json?.text || extracted?.markdown || '',
-        markdown: extracted?.markdown || '',
-        json: extracted?.json || {},
-        chunks: Array.isArray(extracted?.chunks)
-          ? extracted.chunks
-          : chunkText(extracted?.json?.text || extracted?.markdown || '', ctx.options || {}),
-        metadata: {
-          engine: this.name,
-          processing_time: Date.now() - startedAt,
-          fallback: null,
-          warnings: [],
-        },
-      });
-    } catch (err) {
-      return ensureStandardResult({
-        text: '',
-        markdown: '',
-        json: {
-          source: filePath,
-          error: err.message,
-          stub: true,
-        },
-        chunks: [],
-        metadata: {
-          engine: this.name,
-          processing_time: Date.now() - startedAt,
-          fallback: null,
-          warnings: [
-            `Docling unavailable or failed; returned safe stub. Details: ${err.message}`,
-          ],
-        },
-      });
-    }
+    const extracted = await doclingExtractor.extract(filePath, ctx.mime, ctx.options || {});
+    return ensureStandardResult({
+      text: extracted?.json?.text || extracted?.markdown || '',
+      markdown: extracted?.markdown || '',
+      json: extracted?.json || {},
+      chunks: Array.isArray(extracted?.chunks)
+        ? extracted.chunks
+        : chunkText(extracted?.json?.text || extracted?.markdown || '', ctx.options || {}),
+      metadata: {
+        engine: this.name,
+        processing_time: Date.now() - startedAt,
+        fallback: null,
+        warnings: [],
+      },
+    });
   }
 
   async extract(filePath, schema = {}, ctx = {}) {

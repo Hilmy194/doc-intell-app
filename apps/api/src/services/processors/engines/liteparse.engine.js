@@ -1,4 +1,5 @@
 const BaseParser = require('../base.parser');
+const fs = require('fs');
 const { ensureStandardResult, chunkText, readUtf8IfTextLike, resolveFileInfo } = require('../helpers');
 
 class LiteparseEngine extends BaseParser {
@@ -8,12 +9,17 @@ class LiteparseEngine extends BaseParser {
 
   async parse(filePath, ctx = {}) {
     const startedAt = Date.now();
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
     const text = readUtf8IfTextLike(filePath, ctx.mime);
 
     if (text === null) {
       const info = resolveFileInfo(filePath, ctx.mime);
       throw new Error(
-        `Liteparse local mode currently supports text-like inputs only; received .${info.ext || 'unknown'} (${info.mime || 'unknown mime'})`
+        `Liteparse local mode currently supports text-like inputs only; received .${info.ext || 'unknown'} (${info.mime || 'unknown mime'}). Try using docling or kreuzberg engine for binary files.`
       );
     }
 

@@ -26,7 +26,7 @@ class KreuzbergEngine extends BaseParser {
         },
       });
     } catch (err) {
-      throw new Error(`Kreuzberg failed: ${err.message}`);
+      throw new Error(`Kreuzberg extraction failed: ${err.message}`);
     }
   }
 

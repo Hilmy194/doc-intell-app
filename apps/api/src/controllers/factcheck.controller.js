@@ -3,12 +3,32 @@ const { rankKnowledge } = require('../services/knowledge.service');
 const { evaluateClaimGrounded } = require('../services/factcheck.service');
 
 async function runFactCheck(req, res) {
-  const { caseId, claim, topK = 8, minScore = 0.1 } = req.body || {};
+  const { caseId, claim, topK = 8, minScore = 0.1, fileId } = req.body || {};
   if (!caseId) return res.status(400).json({ success: false, error: 'caseId is required' });
   if (!claim || !String(claim).trim()) return res.status(400).json({ success: false, error: 'claim is required' });
 
   try {
-    const knowledge = await listKnowledgeByCase(caseId);
+    let knowledge = await listKnowledgeByCase(caseId);
+
+    if (fileId) {
+      knowledge = knowledge.filter((k) => !fileId || k.fileId === fileId);
+    }
+
+    if (!knowledge || knowledge.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          claim: String(claim),
+          verdict: 'insufficient_evidence',
+          confidence: 0,
+          summary_reasoning: 'No processed documents or indexed chunks found for this case. Please process and index documents first before running fact checks.',
+          limitations: 'Knowledge base is empty. Upload and process documents, then index them before fact checking.',
+          evidence: [],
+          retrieved_context_count: 0,
+        },
+      });
+    }
+
     const ranked = await rankKnowledge(String(claim), knowledge, Number(topK) || 8, Number(minScore) || 0.1);
 
     const evidence = ranked.map((r) => ({

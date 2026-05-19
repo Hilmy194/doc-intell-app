@@ -5,6 +5,7 @@ function buildAttemptOrder(requestedEngine, options = {}) {
   const requested = normalizeEngineName(requestedEngine);
   const customFallback = normalizeEngineName(options.fallback_engine || '');
   const ordered = [];
+  const visited = new Set();
 
   const pushUnique = (name) => {
     if (!name) return;
@@ -18,10 +19,12 @@ function buildAttemptOrder(requestedEngine, options = {}) {
   }
 
   let cursor = requested;
+  visited.add(cursor);
   while (cursor) {
     const next = getFallbackEngineName(cursor);
-    if (!next) break;
+    if (!next || visited.has(next)) break;
     pushUnique(next);
+    visited.add(next);
     cursor = next;
   }
 
@@ -50,6 +53,7 @@ async function processDocument({ engineName, mode, filePath, options = {} }) {
     throw new Error('No processing engines are available');
   }
 
+  const normalizedRequested = normalizeEngineName(engineName);
   const startedAt = Date.now();
   const errors = [];
 
@@ -59,26 +63,30 @@ async function processDocument({ engineName, mode, filePath, options = {} }) {
     try {
       const result = await executeByMode(engine, normalizedMode, filePath, options);
       const elapsed = Date.now() - startedAt;
-      const usedFallback = attemptName !== normalizeEngineName(engineName);
+      const usedFallback = attemptName !== normalizedRequested;
 
       if (usedFallback) {
         console.warn(
-          `[process] Fallback activated from ${normalizeEngineName(engineName)} to ${attemptName}`
+          `[process] Fallback activated from ${normalizedRequested} to ${attemptName}`
         );
       }
 
       return ensureStandardResult(result, {
         engine: attemptName,
+        selected_engine: normalizedRequested,
+        actual_engine_used: attemptName,
+        fallback_used: usedFallback,
         processing_time: elapsed,
         fallback: usedFallback
           ? {
-              requested: normalizeEngineName(engineName),
+              requested: normalizedRequested,
               used: attemptName,
               reason: errors[errors.length - 1] || 'upstream engine failed',
             }
           : null,
         attempted_engines: attempts,
         warnings: Array.isArray(result?.metadata?.warnings) ? result.metadata.warnings : [],
+        error_message: null,
       });
     } catch (err) {
       const message = `${attemptName}: ${err.message}`;

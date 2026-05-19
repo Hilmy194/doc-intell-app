@@ -12,7 +12,11 @@ class OpenDataLoaderEngine extends BaseParser {
     const info = resolveFileInfo(filePath, ctx.mime);
 
     if (info.ext !== 'pdf' && info.mime !== 'application/pdf') {
-      throw new Error('OpenDataLoader PDF only supports PDF input');
+      throw new Error('OpenDataLoader PDF only supports PDF input. Received: .' + info.ext + ' (' + info.mime + ')');
+    }
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
     }
 
     let size = 0;
